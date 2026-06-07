@@ -1,0 +1,375 @@
+<!DOCTYPE html><html lang="ru"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Our Story | Polina</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/TextPlugin.min.js"></script>
+    
+    <style>
+        * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; font-family: "Georgia", serif; color: #fff; }
+        canvas { position: absolute; top: 0; left: 0; w-index: 1; pointer-events: none; }
+        
+        /* Интерфейс поверх 3D */
+        .ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; display: flex; justify-content: center; align-items: center; text-align: center; padding: 20px; }
+        
+        /* Стартовая кнопка */
+        #start-btn { padding: 18px 45px; background: rgba(255,255,255,0.03); backdrop-filter: blur(15px); border-radius: 50px; border: 1px solid rgba(255,192,203,0.3); color: #fff; font-size: 15px; letter-spacing: 5px; cursor: pointer; transition: 0.5s; text-transform: uppercase; }
+        #start-btn:hover { background: rgba(255,192,203,0.15); box-shadow: 0 0 20px rgba(255,192,203,0.2); }
+        
+        /* Экраны для титров */
+        .subtitles { position: absolute; width: 85%; max-width: 600px; opacity: 0; font-size: 22px; line-height: 1.6; letter-spacing: 2px; font-style: italic; pointer-events: none; text-shadow: 0 0 15px rgba(0,0,0,0.8); }
+        
+        /* Таймер (Сцена 6) */
+        #timer-screen { display: none; flex-direction: column; opacity: 0; }
+        #timer-screen h2 { font-size: 20px; letter-spacing: 4px; font-weight: 300; margin-bottom: 20px; text-transform: uppercase; color: #ffb6c1; }
+        .timer-container { display: flex; gap: 15px; justify-content: center; font-family: sans-serif; }
+        .time-block { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px); padding: 15px; border-radius: 15px; min-width: 70px; }
+        .time-block span { display: block; font-size: 28px; font-weight: bold; color: #fff; }
+        .time-block label { font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: #aaa; margin-top: 5px; display: block; font-family: "Georgia", serif; }
+
+        /* Финальный экран */
+        #final-text { font-size: 24px; font-style: normal; letter-spacing: 3px; line-height: 1.8; white-space: pre-line; }
+    </style>
+</head>
+<body>
+
+    <canvas id="webgl"></canvas>
+
+    <div class="ui-layer">
+        <button id="start-btn">Посмотреть магию</button>
+        
+        <div id="sub-1" class="subtitles">Есть люди, которые меняют жизнь навсегда.</div>
+        <div id="sub-2" class="subtitles">Для меня этим человеком стала ты.</div>
+        <div id="sub-3" class="subtitles">Я до сих пор помню тот день...</div>
+        
+        <div id="sub-meta" class="subtitles"></div>
+
+        <div id="timer-screen" class="subtitles">
+            <h2>Мы вместе уже</h2>
+            <div class="timer-container">
+                <div class="time-block"><span id="days">00</span><label>Дней</label></div>
+                <div class="time-block"><span id="hours">00</span><label>Часов</label></div>
+                <div class="time-block"><span id="mins">00</span><label>Минут</label></div>
+                <div class="time-block"><span id="secs">00</span><label>Секунд</label></div>
+            </div>
+        </div>
+
+        <div id="final-text" class="subtitles"></div>
+    </div>
+
+    <audio id="bg-music" loop>
+        <source src="https://cdn.pixabay.com/download/audio/2023/11/20/audio_510de388cf.mp3">
+    </audio>
+
+    <script type="importmap">
+        { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
+    </script>
+
+    <script type="module">
+        import * as THREE from "three";
+
+        // Регистрируем плагин текста в GSAP
+        gsap.registerPlugin(TextPlugin);
+
+        // --- КОНФИГУРАЦИЯ ССЫЛОК НА ФОТО ---
+        // Замени эти заглушки на свои реальные оптимизированные WebP картинки
+        const PHOTO_URLS = {
+            scene2: "https://placehold.co/600x800/221111/fff?text=First+Day.webp", // Сцена 2
+            scene3: [
+                "https://placehold.co/600x800/1a0010/fff?text=Meeting.webp",       // Первая встреча
+                "https://placehold.co/600x800/001a10/fff?text=Walks.webp",         // Первые прогулки
+                "https://placehold.co/600x800/10001a/fff?text=Memories.webp"       // Первые воспоминания
+            ],
+            timeline: [
+                "https://placehold.co/600x800/2a2a00/fff?text=Intro.webp",         // Знакомство
+                "https://placehold.co/600x800/002a2a/fff?text=First+Date.webp",    // Первое свидание
+                "https://placehold.co/600x800/2a002a/fff?text=Holiday.webp",       // Первый праздник
+                "https://placehold.co/600x800/111111/fff?text=Today.webp"          // Сегодня
+            ],
+            final: "https://placehold.co/1080x1920/1a0005/fff?text=Best+Photo.webp" // Финал
+        };
+
+        // --- ИНИЦИАЛИЗАЦИЯ THREE.JS ---
+        const canvas = document.getElementById("webgl");
+        const scene = new THREE.Scene();
+        
+        const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.z = 50;
+
+        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+        // Контейнеры для организации объектов по сценам
+        const mainContainer = new THREE.Group();
+        const particlesContainer = new THREE.Group();
+        scene.add(mainContainer);
+        scene.add(particlesContainer);
+
+        // Текстура свечения для частиц
+        const pGlowTex = (() => {
+            const c = document.createElement("canvas"); c.width = 32; c.height = 32;
+            const ctx = c.getContext("2d");
+            const g = ctx.createRadialGradient(16,16,0,16,16,16);
+            g.addColorStop(0,"rgba(255,255,255,1)"); g.addColorStop(0.3,"rgba(255,182,193,0.6)"); g.addColorStop(1,"transparent");
+            ctx.fillStyle = g; ctx.fillRect(0,0,32,32);
+            return new THREE.CanvasTexture(c);
+        })();
+
+        // --- ГЕНЕРАЦИЯ ОБЛАКА ЧАСТИЦ (Сцена 4) ---
+        const PARTICLE_COUNT = 3000;
+        const pGeometry = new THREE.BufferGeometry();
+        const pPositions = new Float32Array(PARTICLE_COUNT * 3);
+        const pHeartPositions = new Float32Array(PARTICLE_COUNT * 3);
+
+        for(let i=0; i<PARTICLE_COUNT; i++) {
+            // Начальный хаос в пространстве
+            pPositions[i*3] = (Math.random() - 0.5) * 160;
+            pPositions[i*3+1] = (Math.random() - 0.5) * 160;
+            pPositions[i*3+2] = (Math.random() - 0.5) * 100;
+
+            // Координаты формулы сердца в 3D
+            const t = Math.random() * Math.PI * 2;
+            const r = 0.6 + Math.random() * 0.15; // масштаб толщины
+            pHeartPositions[i*3] = 16 * Math.pow(Math.sin(t), 3) * r;
+            pHeartPositions[i*3+1] = (13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t)) * r;
+            pHeartPositions[i*3+2] = (Math.random() - 0.5) * 6; // глубина сердца
+        }
+
+        pGeometry.setAttribute("position", new THREE.BufferAttribute(pPositions, 3));
+        const pMaterial = new THREE.PointsMaterial({
+            size: 0.4, map: pGlowTex, transparent: true, blending: THREE.AdditiveBlending, color: 0xffb6c1, depthWrite: false
+        });
+        const particleSystem = new THREE.Points(pGeometry, pMaterial);
+        particlesContainer.add(particleSystem);
+        particlesContainer.position.y = -2; // Немного центрируем сердце
+
+        // --- ХЕЛПЕР ДЛЯ ЗАГРУЗКИ ФОТО-ПЛОСКОСТЕЙ ---
+        const texLoader = new THREE.TextureLoader();
+        function createPhotoMesh(url, width = 12, height = 16) {
+            const geo = new THREE.PlaneGeometry(width, height);
+            const mat = new THREE.MeshBasicMaterial({ 
+                map: texLoader.load(url), transparent: true, opacity: 0, side: THREE.DoubleSide 
+            });
+            return new THREE.Mesh(geo, mat);
+        }
+
+        // Загружаем сетки для сцен
+        const imgS2 = createPhotoMesh(PHOTO_URLS.scene2);
+        
+        const imgsS3 = PHOTO_URLS.scene3.map(url => createPhotoMesh(url));
+        
+        const labelsS5 = ["Знакомство", "Первое свидание", "Первый праздник", "Сегодня"];
+        const imgsS5 = PHOTO_URLS.timeline.map(url => createPhotoMesh(url, 10, 13.5));
+        
+        const imgFinal = createPhotoMesh(PHOTO_URLS.final, window.innerWidth > 600 ? 18 : 13, window.innerWidth > 600 ? 24 : 17.5);
+
+        // Добавляем все базовые сущности в сцену
+        mainContainer.add(imgS2);
+        imgsS3.forEach(mesh => mainContainer.add(mesh));
+        imgsS5.forEach(mesh => mainContainer.add(mesh));
+        mainContainer.add(imgFinal);
+
+        // --- ЛОГИКА ТАЙМЕРА (Сцена 6) ---
+        function initTimer(targetDateStr) {
+            const targetDate = new Date(targetDateStr);
+            function update() {
+                const diff = new Date() - targetDate;
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+                const mins = Math.floor((diff / 1000 / 60) % 60);
+                const secs = Math.floor((diff / 1000) % 60);
+                
+                document.getElementById("days").innerText = String(days).padStart(2, '0');
+                document.getElementById("hours").innerText = String(hours).padStart(2, '0');
+                document.getElementById("mins").innerText = String(mins).padStart(2, '0');
+                document.getElementById("secs").innerText = String(secs).padStart(2, '0');
+            }
+            setInterval(update, 1000);
+            update();
+        }
+        // Замени на вашу дату знакомства/начала отношений: ГГГГ-ММ-ДДTЧЧ:ММ:СС
+        initTimer("2024-09-15T20:00:00");
+
+        // --- ГЛАВНЫЙ СИНЕМАТОГРАФИЧЕСКИЙ ТАЙМЛАЙН (GSAP) ---
+        const masterTimeline = gsap.timeline({ paused: true });
+
+        function buildTimeline() {
+            // --- СЦЕНА 1: ТИТРЫ НА ЧЁРНОМ ---
+            masterTimeline.to("#sub-1", { opacity: 1, duration: 1.5, y: -10 })
+                          .to("#sub-1", { opacity: 0, duration: 1.2, delay: 2, y: -20 })
+                          .to("#sub-2", { opacity: 1, duration: 1.5, y: -10 })
+                          .to("#sub-2", { opacity: 0, duration: 1.2, delay: 2, y: -20 });
+
+            // --- СЦЕНА 2: НАЧАЛО ИСТОРИИ (Первое фото + Плавный зум) ---
+            masterTimeline.to("#sub-3", { opacity: 1, duration: 1.5 })
+                          .add(() => {
+                              // Слегка отдаляем камеру для красивого наезда
+                              camera.position.z = 52;
+                          })
+                          .to(imgS2.material, { opacity: 1, duration: 2 }, "-=0.5")
+                          // Киноэффект: медленный наезд камеры и лёгкий поворот
+                          .to(camera.position, { z: 32, duration: 6, ease: "power1.out" }, "-=1.5")
+                          .to(imgS2.rotation, { y: 0.08, x: -0.04, duration: 6, ease: "power1.out" }, "-=6")
+                          // Убираем сцену 2
+                          .to("#sub-3", { opacity: 0, duration: 1 })
+                          .to(imgS2.material, { opacity: 0, duration: 1.5, ease: "power1.in" }, "-=1")
+                          .to(imgS2.position, { z: 20, duration: 1.5 }, "-=1.5");
+
+            // --- СЦЕНА 3: ВОСПОМИНАНИЯ (Кадры фильма один за другим) ---
+            const titlesS3 = ["Первая встреча", "Первые прогулки", "Первые воспоминания"];
+            
+            imgsS3.forEach((mesh, index) => {
+                masterTimeline.add(() => {
+                    document.getElementById("sub-meta").innerText = titlesS3[index];
+                    mesh.position.set(index % 2 === 0 ? -25 : 25, (Math.random() - 0.5) * 6, -15);
+                    mesh.rotation.set(0, 0, index % 2 === 0 ? 0.3 : -0.3);
+                })
+                .to("#sub-meta", { opacity: 1, duration: 1 })
+                // Плавный выезд в центр экрана с 3D наклоном
+                .to(mesh.position, { x: 0, y: 0, z: 12, duration: 3, ease: "power2.out" }, "-=0.5")
+                .to(mesh.rotation, { x: index % 2 === 0 ? 0.1 : -0.1, y: index % 2 === 0 ? -0.15 : 0.15, z: index % 2 === 0 ? -0.05 : 0.05, duration: 3 }, "-=3")
+                .to(mesh.material, { opacity: 1, duration: 1.5 }, "-=3")
+                // Исчезновение через улет "сквозь экран" (эффект света)
+                .to("#sub-meta", { opacity: 0, duration: 0.8, delay: 1.5 })
+                .to(mesh.position, { z: 45, duration: 1.5, ease: "power2.in" }, "-=0.8")
+                .to(mesh.material, { opacity: 0, duration: 1.2, ease: "power1.in" }, "-=1.5");
+            });
+
+            // --- СЦЕНА 4: СЕРДЦЕ (Частицы собираются) ---
+            masterTimeline.to(pMaterial, { size: 0.55, duration: 1 })
+                          .add(() => {
+                              // Запускаем интерполяцию координат частиц из хаоса в форму сердца
+                              const posAttr = pGeometry.attributes.position;
+                              for (let i = 0; i < PARTICLE_COUNT * 3; i++) {
+                                  gsap.to(posAttr.array, {
+                                      [i]: pHeartPositions[i],
+                                      duration: 4.5,
+                                      ease: "power3.inOut",
+                                      onUpdate: () => { posAttr.needsUpdate = true; }
+                                  });
+                              }
+                          })
+                          // Камера красиво облетает собирающееся сердце
+                          .to(camera.position, { x: 0, y: 3, z: 32, duration: 5, ease: "power2.out" }, "-=0.5")
+                          .to(pMaterial, { size: 0.3, duration: 2, delay: 3 })
+                          // Растворяем сердце перед следующей сценой
+                          .to(particlesContainer.position, { z: -50, duration: 3, ease: "power1.in" }, "+=1")
+                          .to(pMaterial, { opacity: 0, duration: 2.5 }, "-=3");
+
+            // --- СЦЕНА 5: ЛЕНТА ВРЕМЕНИ (Пролёт мимо событий) ---
+            imgsS5.forEach((mesh, index) => {
+                // Выстраиваем их в ряд по оси X и вглубь по Z
+                mesh.position.set((index - 1.5) * 22, -2, -10 - (index * 8));
+                mesh.rotation.y = (index % 2 === 0) ? 0.2 : -0.2;
+            });
+
+            masterTimeline.add(() => {
+                // Возвращаем камеру в исходную точку движения по рельсам таймлайна
+                camera.position.set(-25, 0, 30);
+                camera.lookAt(new THREE.Vector3(0, 0, -20));
+            })
+            // Проявляем сразу все фото на линии времени
+            .to(imgsS5.map(m => m.material), { opacity: 1, duration: 2 })
+            // Двигаем камеру "сквозь" и "вдоль" галереи событий
+            .to(camera.position, { x: 25, z: 15, duration: 10, ease: "none", 
+                onUpdate: () => {
+                     // Текст обновляется в зависимости от положения камеры
+                     const progress = (camera.position.x + 25) / 50;
+                     let currentLabel = labelsS5[Math.floor(progress * labelsS5.length)];
+                     if(currentLabel) document.getElementById("sub-meta").innerText = currentLabel;
+                }
+            })
+            .to("#sub-meta", { opacity: 1, duration: 0.5 }, "-=10")
+            .to("#sub-meta", { opacity: 0, duration: 1 }, "-=0.5")
+            // Исчезновение таймлайн-галереи
+            .to(imgsS5.map(m => m.material), { opacity: 0, duration: 1.5 })
+            .to(camera.position, { x: 0, y: 0, z: 50, duration: 2, ease: "power2.out" });
+
+            // --- СЦЕНА 6: ТАЙМЕР ---
+            masterTimeline.add(() => {
+                document.getElementById("timer-screen").style.display = "flex";
+            })
+            .to("#timer-screen", { opacity: 1, duration: 1.5 })
+            .to("#timer-screen", { opacity: 0, duration: 1.5, delay: 5 }); // Таймер висит 5 секунд
+
+            // --- ФИНАЛ: ЛУЧШАЯ ФОТОГРАФИЯ + ПЕЧАТНЫЙ ТЕКСТ ---
+            masterTimeline.add(() => {
+                imgFinal.position.set(0, 0, 10);
+            })
+            .to(imgFinal.material, { opacity: 1, duration: 3 })
+            .to(camera.position, { z: 40, duration: 12, ease: "linear" }, "-=3") // Бесконечный медленный наезд в конце
+            .to("#final-text", { opacity: 1, duration: 1 }, "-=2")
+            // Использование плагина TextPlugin для эффекта печатной машинки
+            .to("#final-text", { 
+                duration: 9, 
+                text: {
+                    value: "Спасибо за каждый день рядом.\nЯ люблю тебя.\nИ выбрал бы тебя снова.\nИ снова.\nИ снова. ❤️"
+                }, 
+                ease: "none" 
+            }, "-=1");
+        }
+
+        // --- ЗАПУСК ПО КЛИКУ ПОЛЬЗОВАТЕЛЯ ---
+        const startBtn = document.getElementById("start-btn");
+        startBtn.onclick = () => {
+            startBtn.style.display = "none";
+            
+            // Включаем музыку
+            const music = document.getElementById("bg-music");
+            music.play().catch(e => console.log("Аудио заблокировано браузером:", e));
+            
+            // Строим таймлайн и запускаем проигрывание кино
+            buildTimeline();
+            masterTimeline.play();
+        };
+
+        // --- ЦИКЛ АНИМАЦИИ (РЕНДЕР) ---
+        const clock = new THREE.Clock();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            const elapsedTime = clock.getElapsedTime();
+
+            // В фоновом режиме заставляем частицы мягко мерцать и крутиться, пока они хаотичны
+            if (masterTimeline.progress() < 0.75) { 
+                particlesContainer.rotation.y = elapsedTime * 0.03;
+                particlesContainer.rotation.x = Math.sin(elapsedTime * 0.1) * 0.05;
+            } else {
+                // На сцене с таймером и в финале заставляем само сердце пульсировать как настоящее
+                const pulse = 1 + Math.pow(Math.sin(elapsedTime * 2.5), 6) * 0.04;
+                particlesContainer.scale.set(pulse, pulse, pulse);
+                particlesContainer.rotation.y = elapsedTime * 0.01;
+            }
+
+            // Мягкий параллакс эффект для фото в зависимости от времени (живое колыхание)
+            imgS2.rotation.z = Math.sin(elapsedTime * 0.2) * 0.01;
+            imgFinal.rotation.z = Math.cos(elapsedTime * 0.15) * 0.005;
+
+            renderer.render(scene, camera);
+        }
+        
+        animate();
+
+        // --- АДАПТИВНОСТЬ ПОД ЭКРАНЫ ТЕЛЕФОНОВ ---
+        window.addEventListener("resize", () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            
+            // Динамическая адаптация FOV для вертикальных экранов (чтобы фотки не обрезались по бокам)
+            if (window.innerWidth < 600) {
+                camera.fov = 70; // Более широкий угол для мобилок
+            } else {
+                camera.fov = 55;
+            }
+            
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+        
+        // Вызываем один раз при инициализации
+        if (window.innerWidth < 600) camera.fov = 70; camera.updateProjectionMatrix();
+
+    </script>
+</body></html>
