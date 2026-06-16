@@ -1914,151 +1914,344 @@ if ('serviceWorker' in navigator) {
 }
 </script>
 
-<!-- PRELOADER: показывает прогресс загрузки видео/медиа перед кнопкой Начать -->
-<div id="preloader-overlay" style="
-  position:fixed;inset:0;z-index:200;
+<!-- ═══════════════════════════════════════════════════════════
+     ЖЁСТКИЙ PRELOADER — кнопка «Начать» заблокирована до тех
+     пор, пока ВСЕ видео не отрапортуют canplaythrough.
+     Таймаут на каждое видео — 30 с (медленный интернет).
+     Если файл не загрузился — показываем ошибку + кнопку
+     «Попробовать снова», а не пускаем сломанный показ.
+══════════════════════════════════════════════════════════════ -->
+
+<!-- Preloader UI -->
+<div id="pl" style="
+  position:fixed;inset:0;z-index:500;
   background:#070605;
   display:flex;flex-direction:column;
   align-items:center;justify-content:center;
-  gap:18px;
-  transition:opacity 0.8s ease;
+  gap:0;
 ">
+  <!-- Кольцо прогресса -->
+  <div style="position:relative;width:96px;height:96px;margin-bottom:32px">
+    <svg id="pl-ring-svg" viewBox="0 0 96 96" style="width:96px;height:96px;transform:rotate(-90deg)">
+      <circle cx="48" cy="48" r="40" fill="none" stroke="rgba(201,169,110,.08)" stroke-width="1.5"/>
+      <circle id="pl-ring" cx="48" cy="48" r="40" fill="none"
+        stroke="url(#pl-grad)" stroke-width="1.5"
+        stroke-linecap="round"
+        stroke-dasharray="251.2" stroke-dashoffset="251.2"
+        style="transition:stroke-dashoffset .4s ease"/>
+      <defs>
+        <linearGradient id="pl-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%"   stop-color="#c9a96e"/>
+          <stop offset="50%"  stop-color="#d4a0a0"/>
+          <stop offset="100%" stop-color="#c9a96e"/>
+        </linearGradient>
+      </defs>
+    </svg>
+    <div style="
+      position:absolute;inset:0;
+      display:flex;align-items:center;justify-content:center;
+      font-family:'Playfair Display',serif;
+      font-size:15px;color:rgba(201,169,110,.7);
+      font-style:italic;
+    " id="pl-pct">0%</div>
+  </div>
+
+  <!-- Статус -->
   <div style="
     font-family:'Cinzel',serif;
-    font-size:clamp(8px,1.8vw,9.5px);
-    letter-spacing:clamp(4px,1.5vw,8px);
+    font-size:clamp(7.5px,1.6vw,8.5px);
+    letter-spacing:clamp(4px,1.5vw,7px);
     text-transform:uppercase;
-    color:rgba(201,169,110,.5);
-  " id="preloader-text">Загрузка…</div>
+    color:rgba(201,169,110,.45);
+    margin-bottom:10px;
+  " id="pl-txt">Подготовка…</div>
+
+  <!-- Список файлов -->
   <div style="
-    width:clamp(160px,40vw,280px);
-    height:1px;
-    background:rgba(201,169,110,.12);
-    position:relative;overflow:hidden;
-  ">
-    <div id="preloader-bar" style="
-      position:absolute;top:0;left:0;height:100%;width:0%;
-      background:linear-gradient(90deg,var(--gold),var(--rose),var(--gold));
-      transition:width 0.3s ease;
+    margin-top:18px;
+    display:flex;flex-direction:column;gap:5px;
+    max-width:clamp(220px,60vw,360px);width:100%;
+  " id="pl-files"></div>
+
+  <!-- Блок ошибки (скрыт) -->
+  <div id="pl-err" style="display:none;flex-direction:column;align-items:center;gap:14px;margin-top:24px">
+    <div style="
+      font-family:'Cinzel',serif;font-size:8px;letter-spacing:4px;
+      text-transform:uppercase;color:rgba(212,100,100,.7);
+    ">Не удалось загрузить</div>
+    <div id="pl-err-list" style="
+      font-family:'Playfair Display',serif;font-size:11px;font-style:italic;
+      color:rgba(237,224,204,.35);text-align:center;line-height:1.8;
     "></div>
+    <button onclick="window.plRetry()" style="
+      margin-top:4px;
+      font-family:'Cinzel',serif;font-size:7.5px;letter-spacing:5px;
+      text-transform:uppercase;color:rgba(201,169,110,.6);
+      background:none;border:1px solid rgba(201,169,110,.25);
+      padding:10px 24px;cursor:pointer;
+    ">Повторить</button>
   </div>
-  <div style="
-    font-family:'Playfair Display',serif;
-    font-size:clamp(9px,2vw,11px);
-    color:rgba(237,224,204,.2);
-    font-style:italic;
-  " id="preloader-pct">0%</div>
 </div>
 
 <script>
 (function(){
-  // Собираем все медиафайлы из конфига после его загрузки
-  function waitForConfig(cb, attempts){
-    attempts = attempts || 0;
-    if(window.STORY_CONFIG){ cb(); return; }
-    if(attempts > 100){ cb(); return; } // fallback
-    setTimeout(function(){ waitForConfig(cb, attempts+1); }, 80);
+  /* ── CONFIG ── */
+  var VIDEO_TIMEOUT_MS  = 30000; // 30 сек на каждое видео
+  var AUDIO_TIMEOUT_MS  = 15000;
+  var IMAGE_TIMEOUT_MS  = 12000;
+  var MAX_CONCURRENT    = 4;     // параллельных загрузок
+
+  /* ── STATE ── */
+  var allUrls   = [];  // [{url, type, label, status}]
+  var loaded    = 0;
+  var failed    = [];
+  var isRunning = false;
+
+  /* ── HELPERS ── */
+  function ext(url){ return (url.split('?')[0].split('.').pop()||'').toLowerCase(); }
+  function typeOf(url){
+    var e = ext(url);
+    if(/^(mp4|webm|mov|m4v)$/.test(e)) return 'video';
+    if(/^(mp3|ogg|aac|wav|m4a)$/.test(e)) return 'audio';
+    return 'image';
+  }
+  function shortName(url){
+    var p = url.split('?')[0].split('/');
+    var n = p[p.length-1] || url;
+    return n.length > 28 ? n.slice(0,12)+'…'+n.slice(-10) : n;
   }
 
-  function collectMediaUrls(C){
-    var urls = [];
-    var scenes = [C.scene2,C.scene5,C.scene6,C.sceneFinal];
-    scenes.forEach(function(s){
-      if(s && s.media && s.media.src) urls.push(s.media.src);
-    });
-    var gridScenes = [C.scene3, C.scene4, C.scene7, C.scene9];
-    gridScenes.forEach(function(s){
-      if(s && s.items) s.items.forEach(function(it){ if(it.src) urls.push(it.src); });
-    });
-    if(C.settings && C.settings.musicUrl) urls.push(C.settings.musicUrl);
-    // дедупликация
-    return urls.filter(function(v,i,a){ return a.indexOf(v)===i; });
+  /* ── FILE ROW UI ── */
+  function addFileRow(item){
+    var row = document.createElement('div');
+    row.id  = 'plr-'+item.idx;
+    row.style.cssText = 'display:flex;align-items:center;gap:8px;opacity:.55;transition:opacity .3s';
+    row.innerHTML =
+      '<div style="width:5px;height:5px;border-radius:50%;background:rgba(201,169,110,.3);flex-shrink:0" id="plrd-'+item.idx+'"></div>'+
+      '<div style="font-family:Cinzel,serif;font-size:6.5px;letter-spacing:2px;text-transform:uppercase;color:rgba(237,224,204,.4);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:280px">'+item.label+'</div>'+
+      '<div style="font-family:Cinzel,serif;font-size:6px;letter-spacing:1px;color:rgba(201,169,110,.3);margin-left:auto;flex-shrink:0" id="plrs-'+item.idx+'">ожидание</div>';
+    document.getElementById('pl-files').appendChild(row);
+    return row;
+  }
+  function rowLoading(item){
+    var dot = document.getElementById('plrd-'+item.idx);
+    var st  = document.getElementById('plrs-'+item.idx);
+    var row = document.getElementById('plr-'+item.idx);
+    if(dot) dot.style.background = 'rgba(201,169,110,.7)';
+    if(st)  st.textContent = 'загрузка…';
+    if(row) row.style.opacity = '.9';
+  }
+  function rowDone(item, ok){
+    var dot = document.getElementById('plrd-'+item.idx);
+    var st  = document.getElementById('plrs-'+item.idx);
+    var row = document.getElementById('plr-'+item.idx);
+    if(dot) dot.style.background = ok ? 'rgba(100,200,120,.8)' : 'rgba(220,80,80,.7)';
+    if(st)  st.textContent = ok ? '✓' : '✗ ошибка';
+    if(row) row.style.opacity = ok ? '.5' : '1';
   }
 
-  function preloadOne(url, onProgress){
+  /* ── SINGLE PRELOAD ── */
+  function preloadOne(item){
     return new Promise(function(resolve){
-      // Для видео — только metadata, не весь файл (экономим трафик, но гарантируем начало)
-      var isVideo = /\.(mp4|webm|mov|m4v)(\?|$)/i.test(url);
-      var isAudio = /\.(mp3|ogg|aac|wav|m4a)(\?|$)/i.test(url);
+      rowLoading(item);
+      var t = item.type;
+      var done = false;
 
-      if(isVideo){
+      function fin(ok){
+        if(done) return;
+        done = true;
+        clearTimeout(timer);
+        rowDone(item, ok);
+        if(!ok) failed.push(item);
+        loaded++;
+        updateProgress();
+        resolve(ok);
+      }
+
+      var timer;
+
+      if(t === 'video'){
         var v = document.createElement('video');
-        v.preload = 'auto';
-        v.muted = true;
+        v.preload  = 'auto';
+        v.muted    = true;
         v.playsInline = true;
-        var done = false;
-        function fin(){ if(!done){ done=true; onProgress(); resolve(); } }
-        v.addEventListener('canplaythrough', fin);
-        v.addEventListener('error', fin);
-        setTimeout(fin, 8000); // таймаут 8с на видео
-        v.src = url;
+        v.setAttribute('playsinline','');
+        /* canplaythrough = браузер уверен, что может играть без буферизации */
+        v.addEventListener('canplaythrough', function(){ fin(true); }, {once:true});
+        v.addEventListener('error',          function(){ fin(false); }, {once:true});
+        /* дополнительно — если за 5 сек уже достаточно данных (readyState≥3) */
+        v.addEventListener('progress', function(){
+          if(v.readyState >= 3) fin(true);
+        });
+        timer = setTimeout(function(){ fin(false); }, VIDEO_TIMEOUT_MS);
+        v.src = item.url;
         v.load();
-      } else if(isAudio){
+        /* Сохраняем элемент — потом DOM его переиспользует */
+        item._el = v;
+
+      } else if(t === 'audio'){
         var a = document.createElement('audio');
         a.preload = 'auto';
-        var done = false;
-        function fin(){ if(!done){ done=true; onProgress(); resolve(); } }
-        a.addEventListener('canplaythrough', fin);
-        a.addEventListener('error', fin);
-        setTimeout(fin, 6000);
-        a.src = url;
+        a.addEventListener('canplaythrough', function(){ fin(true); },  {once:true});
+        a.addEventListener('error',          function(){ fin(false); }, {once:true});
+        timer = setTimeout(function(){ fin(false); }, AUDIO_TIMEOUT_MS);
+        a.src = item.url;
         a.load();
+        item._el = a;
+
       } else {
-        // Картинки
         var img = new Image();
-        img.onload = img.onerror = function(){ onProgress(); resolve(); };
-        img.src = url;
+        img.onload  = function(){ fin(true);  };
+        img.onerror = function(){ fin(false); };
+        timer = setTimeout(function(){ fin(false); }, IMAGE_TIMEOUT_MS);
+        img.src = item.url;
       }
     });
   }
+
+  /* ── PROGRESS UI ── */
+  function updateProgress(){
+    var total = allUrls.length;
+    var pct   = total ? Math.round((loaded/total)*100) : 100;
+    var circ  = 251.2;
+    var offset = circ - circ*(pct/100);
+    var ring  = document.getElementById('pl-ring');
+    var pctEl = document.getElementById('pl-pct');
+    var txt   = document.getElementById('pl-txt');
+    if(ring)  ring.style.strokeDashoffset = offset;
+    if(pctEl) pctEl.textContent = pct+'%';
+    if(txt){
+      if(pct < 20)       txt.textContent = 'Готовим воспоминания…';
+      else if(pct < 45)  txt.textContent = 'Загружаем видео…';
+      else if(pct < 70)  txt.textContent = 'Почти готово…';
+      else if(pct < 95)  txt.textContent = 'Собираем историю…';
+      else               txt.textContent = 'Готово ✦';
+    }
+  }
+
+  /* ── QUEUE RUNNER ── */
+  function runQueue(items, onAllDone){
+    var queue  = items.slice();
+    var active = 0;
+    function next(){
+      while(active < MAX_CONCURRENT && queue.length){
+        active++;
+        var item = queue.shift();
+        preloadOne(item).then(function(){ active--; next(); });
+      }
+      if(!active && !queue.length) onAllDone();
+    }
+    next();
+  }
+
+  /* ── SHOW RESULT ── */
+  function onAllLoaded(){
+    if(failed.length){
+      /* Показываем ошибки, но НЕ разблокируем кнопку автоматически */
+      var errDiv  = document.getElementById('pl-err');
+      var errList = document.getElementById('pl-err-list');
+      if(errDiv)  errDiv.style.display = 'flex';
+      if(errList) errList.innerHTML = failed.map(function(f){
+        return '✗ '+f.label;
+      }).join('<br>');
+      /* Кнопка «Начать» остаётся заблокированной */
+    } else {
+      /* Всё загружено — скрываем preloader и разблокируем кнопку */
+      unlockAndHide();
+    }
+  }
+
+  function unlockAndHide(){
+    var pl  = document.getElementById('pl');
+    var btn = document.getElementById('start-btn');
+    if(btn){
+      btn.disabled = false;
+      btn.style.opacity = '1';
+      btn.style.pointerEvents = 'auto';
+      btn.style.cursor = 'pointer';
+    }
+    if(pl){
+      pl.style.transition = 'opacity 1s ease';
+      pl.style.opacity = '0';
+      setTimeout(function(){ if(pl.parentNode) pl.parentNode.removeChild(pl); }, 1050);
+    }
+  }
+
+  /* ── RETRY ── */
+  window.plRetry = function(){
+    var errDiv = document.getElementById('pl-err');
+    if(errDiv) errDiv.style.display = 'none';
+    var retryItems = failed.slice();
+    failed = [];
+    loaded -= retryItems.length;
+    retryItems.forEach(function(item){
+      /* сбрасываем UI строки */
+      var dot = document.getElementById('plrd-'+item.idx);
+      var st  = document.getElementById('plrs-'+item.idx);
+      var row = document.getElementById('plr-'+item.idx);
+      if(dot) dot.style.background = 'rgba(201,169,110,.3)';
+      if(st)  st.textContent = 'ожидание';
+      if(row) row.style.opacity = '.55';
+    });
+    updateProgress();
+    runQueue(retryItems, onAllLoaded);
+  };
+
+  /* ── INIT (ждём STORY_CONFIG) ── */
+  function waitForConfig(cb, n){
+    n = n||0;
+    if(window.STORY_CONFIG){ cb(); return; }
+    if(n > 150){ cb(); return; }
+    setTimeout(function(){ waitForConfig(cb, n+1); }, 80);
+  }
+
+  /* ── БЛОКИРУЕМ КНОПКУ сразу же ── */
+  document.addEventListener('DOMContentLoaded', function(){
+    var btn = document.getElementById('start-btn');
+    if(btn){
+      btn.disabled = true;
+      btn.style.opacity = '.3';
+      btn.style.pointerEvents = 'none';
+      btn.style.cursor = 'not-allowed';
+    }
+  });
 
   waitForConfig(function(){
     var C = window.STORY_CONFIG;
-    if(!C){ hidePreloader(); return; }
-    var urls = collectMediaUrls(C);
-    if(!urls.length){ hidePreloader(); return; }
+    if(!C){ unlockAndHide(); return; }
 
-    var loaded = 0;
-    var total = urls.length;
+    /* Собираем ВСЕ URL */
+    var raw = [];
+    [C.scene2, C.scene5, C.scene6, C.sceneFinal].forEach(function(s){
+      if(s && s.media && s.media.src) raw.push(s.media.src);
+    });
+    [C.scene3, C.scene4, C.scene7, C.scene9].forEach(function(s){
+      if(s && s.items) s.items.forEach(function(it){ if(it.src) raw.push(it.src); });
+    });
+    if(C.settings && C.settings.musicUrl) raw.push(C.settings.musicUrl);
 
-    function onProgress(){
-      loaded++;
-      var pct = Math.round((loaded/total)*100);
-      var bar = document.getElementById('preloader-bar');
-      var pctEl = document.getElementById('preloader-pct');
-      var txt = document.getElementById('preloader-text');
-      if(bar) bar.style.width = pct + '%';
-      if(pctEl) pctEl.textContent = pct + '%';
-      if(txt){
-        if(pct < 30) txt.textContent = 'Загружаем воспоминания…';
-        else if(pct < 60) txt.textContent = 'Почти готово…';
-        else if(pct < 90) txt.textContent = 'Собираем историю…';
-        else txt.textContent = 'Готово ✦';
-      }
-      if(loaded >= total) setTimeout(hidePreloader, 600);
-    }
+    /* Дедупликация */
+    var seen = {};
+    raw.forEach(function(u){ seen[u]=true; });
+    var unique = Object.keys(seen);
 
-    // Запускаем параллельно, но не больше 3 одновременно
-    var queue = urls.slice();
-    var active = 0;
-    var maxConcurrent = 3;
+    if(!unique.length){ unlockAndHide(); return; }
 
-    function next(){
-      while(active < maxConcurrent && queue.length){
-        active++;
-        var url = queue.shift();
-        preloadOne(url, onProgress).then(function(){ active--; next(); });
-      }
-    }
-    next();
+    /* Строим объекты */
+    allUrls = unique.map(function(u, i){
+      var item = { url:u, idx:i, type:typeOf(u), label:shortName(u) };
+      addFileRow(item);
+      return item;
+    });
+
+    /* Видео грузим первыми (они тяжелее) */
+    allUrls.sort(function(a,b){
+      var order = {video:0, audio:1, image:2};
+      return order[a.type] - order[b.type];
+    });
+
+    runQueue(allUrls, onAllLoaded);
   });
-
-  function hidePreloader(){
-    var el = document.getElementById('preloader-overlay');
-    if(!el) return;
-    el.style.opacity = '0';
-    setTimeout(function(){ if(el.parentNode) el.parentNode.removeChild(el); }, 900);
-  }
 })();
 </script>
 
