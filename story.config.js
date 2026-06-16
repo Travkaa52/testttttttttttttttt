@@ -173,8 +173,8 @@ window.STORY_CONFIG = {
     chapter: "Финал",
     media: {
       type: "photo",                             // "photo" или "video"
-      src:  "https://placehold.co/800x1067/0d0a08/e8d5a3?text=Photo+20",
-      // poster: "media/final-poster.jpg",
+      src:  "media/photo20.png",
+      // poster: "media/photo20.png",
     }
   },
 

@@ -6,6 +6,7 @@
 <meta name="theme-color" content="#070605">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
+<link rel="manifest" href="manifest.json">
 <title>Our Story</title>
 
 <!-- ШРИФТ: скачай "Playfair Display" из Google Fonts -->
@@ -1701,32 +1702,32 @@ function buildAndPlay(){
 
   // SC1
   masterTl.add(()=>{ showScene('sc1'); showChapter(0); });
-  masterTl.fromTo('#s1e',{opacity:0,y:14},{opacity:1,y:0,duration:1.2});
-  masterTl.fromTo('#s1h',{opacity:0,y:22},{opacity:1,y:0,duration:1.5},'-=.6');
-  masterTl.fromTo('#s1b',{opacity:0,y:14},{opacity:1,y:0,duration:1.2},'-=.7');
-  masterTl.to('#sc1',{opacity:0,duration:1.3,delay:3.2});
+  masterTl.fromTo('#s1e',{opacity:0,y:14},{opacity:1,y:0,duration:1.8});
+  masterTl.fromTo('#s1h',{opacity:0,y:22},{opacity:1,y:0,duration:2.2},'-=.8');
+  masterTl.fromTo('#s1b',{opacity:0,y:14},{opacity:1,y:0,duration:1.8},'-=1');
+  masterTl.to('#sc1',{opacity:0,duration:1.5,delay:7});
 
   // SC2
   masterTl.add(()=>{ hideScene('sc1'); showScene('sc2'); showChapter(1); });
-  masterTl.fromTo('#pf2',{opacity:0,x:-44,rotationY:isMobile?0:9},{opacity:1,x:0,rotationY:0,duration:1.7,ease:'power3.out'});
-  masterTl.fromTo('#s2e',{opacity:0,y:10},{opacity:1,y:0,duration:.9},'-=1');
-  masterTl.fromTo('#s2h',{opacity:0,y:18},{opacity:1,y:0,duration:1.2},'-=.7');
-  masterTl.fromTo('#s2b',{opacity:0,y:12},{opacity:1,y:0,duration:1},'-=.6');
-  if(!isMobile) masterTl.to('#pf2',{rotationY:-4,rotationX:2,duration:8,ease:'power1.inOut'},'+=.5');
-  masterTl.to('#sc2',{opacity:0,duration:1.1,delay:1.5});
+  masterTl.fromTo('#pf2',{opacity:0,x:-44,rotationY:isMobile?0:9},{opacity:1,x:0,rotationY:0,duration:2.2,ease:'power3.out'});
+  masterTl.fromTo('#s2e',{opacity:0,y:10},{opacity:1,y:0,duration:1.4},'-=1.4');
+  masterTl.fromTo('#s2h',{opacity:0,y:18},{opacity:1,y:0,duration:1.8},'-=1');
+  masterTl.fromTo('#s2b',{opacity:0,y:12},{opacity:1,y:0,duration:1.5},'-=.8');
+  if(!isMobile) masterTl.to('#pf2',{rotationY:-4,rotationX:2,duration:10,ease:'power1.inOut'},'+=.5');
+  masterTl.to('#sc2',{opacity:0,duration:1.3,delay:5});
 
   // SC3
   masterTl.add(()=>{ hideScene('sc2'); showScene('sc3'); showChapter(2); });
-  masterTl.fromTo('#s3e',{opacity:0,y:10},{opacity:1,y:0,duration:.9});
-  masterTl.fromTo('#s3h',{opacity:0,y:16},{opacity:1,y:0,duration:1.1},'-=.5');
+  masterTl.fromTo('#s3e',{opacity:0,y:10},{opacity:1,y:0,duration:1.4});
+  masterTl.fromTo('#s3h',{opacity:0,y:16},{opacity:1,y:0,duration:1.7},'-=.7');
   masterTl.to('#grid3',{opacity:1,duration:.1});
   masterTl.add(()=>revealGrid('grid3'));
-  masterTl.to('#sc3',{opacity:0,duration:1.3,delay:4.5});
+  masterTl.to('#sc3',{opacity:0,duration:1.5,delay:9});
 
   // SC4
   masterTl.add(()=>{ hideScene('sc3'); showScene('sc4'); showChapter(3); });
-  masterTl.fromTo('#s4e',{opacity:0,y:10},{opacity:1,y:0,duration:.9});
-  masterTl.fromTo('#s4h',{opacity:0,y:16},{opacity:1,y:0,duration:1.1},'-=.5');
+  masterTl.fromTo('#s4e',{opacity:0,y:10},{opacity:1,y:0,duration:1.4});
+  masterTl.fromTo('#s4h',{opacity:0,y:16},{opacity:1,y:0,duration:1.7},'-=.7');
   masterTl.add(()=>{
     animateFilmstrip('fs1-wrap','fs1',1);
     const captions = C.scene4.items.map(i=>i.caption).filter(Boolean);
@@ -1743,16 +1744,16 @@ function buildAndPlay(){
     gsap.to(tick,{opacity:.9,duration:.5});
     setInterval(nextTick,2200);
   });
-  masterTl.to('#sc4',{opacity:0,duration:1.3,delay:9});
+  masterTl.to('#sc4',{opacity:0,duration:1.5,delay:15});
 
   // SC5
   masterTl.add(()=>{ hideScene('sc4'); showScene('sc5'); showChapter(4); });
-  masterTl.fromTo('#s5e',{opacity:0,x:-14},{opacity:1,x:0,duration:.9});
-  masterTl.fromTo('#s5h',{opacity:0,x:-20},{opacity:1,x:0,duration:1.2},'-=.5');
-  masterTl.fromTo('#s5b',{opacity:0,x:-12},{opacity:1,x:0,duration:1},'-=.6');
-  masterTl.to('#gl5',{width:60,duration:1,ease:'power2.out'},'-=.7');
-  masterTl.fromTo('#pf5',{opacity:0,x:44,rotationY:isMobile?0:-9},{opacity:1,x:0,rotationY:0,duration:1.7,ease:'power3.out'},'-=2.6');
-  masterTl.to('#sc5',{opacity:0,duration:1.2,delay:4.5});
+  masterTl.fromTo('#s5e',{opacity:0,x:-14},{opacity:1,x:0,duration:1.4});
+  masterTl.fromTo('#s5h',{opacity:0,x:-20},{opacity:1,x:0,duration:1.8},'-=.7');
+  masterTl.fromTo('#s5b',{opacity:0,x:-12},{opacity:1,x:0,duration:1.5},'-=.8');
+  masterTl.to('#gl5',{width:60,duration:1.4,ease:'power2.out'},'-=.9');
+  masterTl.fromTo('#pf5',{opacity:0,x:44,rotationY:isMobile?0:-9},{opacity:1,x:0,rotationY:0,duration:2.2,ease:'power3.out'},'-=3.4');
+  masterTl.to('#sc5',{opacity:0,duration:1.4,delay:8});
 
   // SC6 — ВИДЕО ЗАПУСКАЕТСЯ АВТОМАТИЧЕСКИ
   masterTl.add(()=>{
@@ -1760,9 +1761,9 @@ function buildAndPlay(){
     const v = document.querySelector('#sc6-vbg video');
     if(v){ v.muted=true; v.play().catch(()=>{}); }
   });
-  masterTl.fromTo('#s6e',{opacity:0,y:14},{opacity:1,y:0,duration:1.1});
-  masterTl.fromTo('#s6h',{opacity:0,y:20},{opacity:1,y:0,duration:1.3},'-=.5');
-  masterTl.to('#sc6',{opacity:0,duration:1.5,delay:6});
+  masterTl.fromTo('#s6e',{opacity:0,y:14},{opacity:1,y:0,duration:1.6});
+  masterTl.fromTo('#s6h',{opacity:0,y:20},{opacity:1,y:0,duration:1.9},'-=.7');
+  masterTl.to('#sc6',{opacity:0,duration:1.8,delay:12});
   masterTl.add(()=>{
     const v = document.querySelector('#sc6-vbg video');
     if(v) v.pause();
@@ -1770,11 +1771,11 @@ function buildAndPlay(){
 
   // SC7
   masterTl.add(()=>{ hideScene('sc6'); showScene('sc7'); showChapter(6); });
-  masterTl.fromTo('#s7e',{opacity:0,y:10},{opacity:1,y:0,duration:.9});
-  masterTl.fromTo('#s7h',{opacity:0,y:16},{opacity:1,y:0,duration:1.1},'-=.5');
+  masterTl.fromTo('#s7e',{opacity:0,y:10},{opacity:1,y:0,duration:1.4});
+  masterTl.fromTo('#s7h',{opacity:0,y:16},{opacity:1,y:0,duration:1.7},'-=.7');
   masterTl.to('#grid7',{opacity:1,duration:.1});
   masterTl.add(()=>revealGrid('grid7'));
-  masterTl.to('#sc7',{opacity:0,duration:1.3,delay:5});
+  masterTl.to('#sc7',{opacity:0,duration:1.5,delay:9});
 
   // SC8
   masterTl.add(()=>{
@@ -1782,25 +1783,25 @@ function buildAndPlay(){
     gsap.to('#heart-canvas',{opacity:1,duration:1.6});
     window.heartStart();
   });
-  masterTl.fromTo('#s8e',{opacity:0,y:10},{opacity:1,y:0,duration:1.1});
-  masterTl.fromTo('#s8h',{opacity:0,y:18},{opacity:1,y:0,duration:1.3},'-=.5');
-  masterTl.to('#sc8',{opacity:0,duration:1.6,delay:5});
+  masterTl.fromTo('#s8e',{opacity:0,y:10},{opacity:1,y:0,duration:1.6});
+  masterTl.fromTo('#s8h',{opacity:0,y:18},{opacity:1,y:0,duration:1.9},'-=.7');
+  masterTl.to('#sc8',{opacity:0,duration:1.8,delay:9});
   masterTl.add(()=>{
     window.heartFade(()=>gsap.to('#heart-canvas',{opacity:0,duration:1}));
-  },'-=2.2');
+  },'-=3');
 
   // SC9
   masterTl.add(()=>{ hideScene('sc8'); showScene('sc9'); showChapter(8); });
-  masterTl.fromTo('#s9e',{opacity:0,y:10},{opacity:1,y:0,duration:.9});
-  masterTl.fromTo('#s9h',{opacity:0,y:16},{opacity:1,y:0,duration:1.1},'-=.5');
+  masterTl.fromTo('#s9e',{opacity:0,y:10},{opacity:1,y:0,duration:1.4});
+  masterTl.fromTo('#s9h',{opacity:0,y:16},{opacity:1,y:0,duration:1.7},'-=.7');
   masterTl.add(()=>animateFilmstrip('fs2-wrap','fs2',-1));
-  masterTl.to('#sc9',{opacity:0,duration:1.3,delay:8});
+  masterTl.to('#sc9',{opacity:0,duration:1.5,delay:14});
 
   // SC10
   masterTl.add(()=>{ hideScene('sc9'); showScene('sc10'); showChapter(9); });
   masterTl.fromTo('#timer-wrap',{opacity:0,y:22,scale:.95},
-    {opacity:1,y:0,scale:1,duration:1.5,ease:'power3.out'});
-  masterTl.to('#sc10',{opacity:0,duration:1.6,delay:8});
+    {opacity:1,y:0,scale:1,duration:2,ease:'power3.out'});
+  masterTl.to('#sc10',{opacity:0,duration:1.8,delay:13});
 
   // FINAL
   masterTl.add(()=>{ hideScene('sc10'); showScene('sc-final'); showChapter(10); });
@@ -1902,7 +1903,165 @@ window.beginStory = function(){
 } // end initApp
 </script>
 
-<!-- Thank Author Button — правый нижний угол, только на финале -->
+<!-- PWA: Service Worker Registration -->
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('sw.js').catch(function(err) {
+      console.log('SW registration failed:', err);
+    });
+  });
+}
+</script>
+
+<!-- PRELOADER: показывает прогресс загрузки видео/медиа перед кнопкой Начать -->
+<div id="preloader-overlay" style="
+  position:fixed;inset:0;z-index:200;
+  background:#070605;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  gap:18px;
+  transition:opacity 0.8s ease;
+">
+  <div style="
+    font-family:'Cinzel',serif;
+    font-size:clamp(8px,1.8vw,9.5px);
+    letter-spacing:clamp(4px,1.5vw,8px);
+    text-transform:uppercase;
+    color:rgba(201,169,110,.5);
+  " id="preloader-text">Загрузка…</div>
+  <div style="
+    width:clamp(160px,40vw,280px);
+    height:1px;
+    background:rgba(201,169,110,.12);
+    position:relative;overflow:hidden;
+  ">
+    <div id="preloader-bar" style="
+      position:absolute;top:0;left:0;height:100%;width:0%;
+      background:linear-gradient(90deg,var(--gold),var(--rose),var(--gold));
+      transition:width 0.3s ease;
+    "></div>
+  </div>
+  <div style="
+    font-family:'Playfair Display',serif;
+    font-size:clamp(9px,2vw,11px);
+    color:rgba(237,224,204,.2);
+    font-style:italic;
+  " id="preloader-pct">0%</div>
+</div>
+
+<script>
+(function(){
+  // Собираем все медиафайлы из конфига после его загрузки
+  function waitForConfig(cb, attempts){
+    attempts = attempts || 0;
+    if(window.STORY_CONFIG){ cb(); return; }
+    if(attempts > 100){ cb(); return; } // fallback
+    setTimeout(function(){ waitForConfig(cb, attempts+1); }, 80);
+  }
+
+  function collectMediaUrls(C){
+    var urls = [];
+    var scenes = [C.scene2,C.scene5,C.scene6,C.sceneFinal];
+    scenes.forEach(function(s){
+      if(s && s.media && s.media.src) urls.push(s.media.src);
+    });
+    var gridScenes = [C.scene3, C.scene4, C.scene7, C.scene9];
+    gridScenes.forEach(function(s){
+      if(s && s.items) s.items.forEach(function(it){ if(it.src) urls.push(it.src); });
+    });
+    if(C.settings && C.settings.musicUrl) urls.push(C.settings.musicUrl);
+    // дедупликация
+    return urls.filter(function(v,i,a){ return a.indexOf(v)===i; });
+  }
+
+  function preloadOne(url, onProgress){
+    return new Promise(function(resolve){
+      // Для видео — только metadata, не весь файл (экономим трафик, но гарантируем начало)
+      var isVideo = /\.(mp4|webm|mov|m4v)(\?|$)/i.test(url);
+      var isAudio = /\.(mp3|ogg|aac|wav|m4a)(\?|$)/i.test(url);
+
+      if(isVideo){
+        var v = document.createElement('video');
+        v.preload = 'auto';
+        v.muted = true;
+        v.playsInline = true;
+        var done = false;
+        function fin(){ if(!done){ done=true; onProgress(); resolve(); } }
+        v.addEventListener('canplaythrough', fin);
+        v.addEventListener('error', fin);
+        setTimeout(fin, 8000); // таймаут 8с на видео
+        v.src = url;
+        v.load();
+      } else if(isAudio){
+        var a = document.createElement('audio');
+        a.preload = 'auto';
+        var done = false;
+        function fin(){ if(!done){ done=true; onProgress(); resolve(); } }
+        a.addEventListener('canplaythrough', fin);
+        a.addEventListener('error', fin);
+        setTimeout(fin, 6000);
+        a.src = url;
+        a.load();
+      } else {
+        // Картинки
+        var img = new Image();
+        img.onload = img.onerror = function(){ onProgress(); resolve(); };
+        img.src = url;
+      }
+    });
+  }
+
+  waitForConfig(function(){
+    var C = window.STORY_CONFIG;
+    if(!C){ hidePreloader(); return; }
+    var urls = collectMediaUrls(C);
+    if(!urls.length){ hidePreloader(); return; }
+
+    var loaded = 0;
+    var total = urls.length;
+
+    function onProgress(){
+      loaded++;
+      var pct = Math.round((loaded/total)*100);
+      var bar = document.getElementById('preloader-bar');
+      var pctEl = document.getElementById('preloader-pct');
+      var txt = document.getElementById('preloader-text');
+      if(bar) bar.style.width = pct + '%';
+      if(pctEl) pctEl.textContent = pct + '%';
+      if(txt){
+        if(pct < 30) txt.textContent = 'Загружаем воспоминания…';
+        else if(pct < 60) txt.textContent = 'Почти готово…';
+        else if(pct < 90) txt.textContent = 'Собираем историю…';
+        else txt.textContent = 'Готово ✦';
+      }
+      if(loaded >= total) setTimeout(hidePreloader, 600);
+    }
+
+    // Запускаем параллельно, но не больше 3 одновременно
+    var queue = urls.slice();
+    var active = 0;
+    var maxConcurrent = 3;
+
+    function next(){
+      while(active < maxConcurrent && queue.length){
+        active++;
+        var url = queue.shift();
+        preloadOne(url, onProgress).then(function(){ active--; next(); });
+      }
+    }
+    next();
+  });
+
+  function hidePreloader(){
+    var el = document.getElementById('preloader-overlay');
+    if(!el) return;
+    el.style.opacity = '0';
+    setTimeout(function(){ if(el.parentNode) el.parentNode.removeChild(el); }, 900);
+  }
+})();
+</script>
+
 <div class="thank-author-wrap" id="thank-author-wrap">
   <a href="https://send.monobank.ua/jar/6S34HzcLMS" class="thank-author-btn" id="thank-author-btn" target="_blank" rel="noopener noreferrer">
     <span class="thank-icon">✨</span>
