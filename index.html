@@ -414,8 +414,62 @@ html, body {
 }
 
 /* ─── FILMSTRIP ─── */
-.filmstrip-wrap { overflow: hidden; width: 100%; opacity: 0; position: relative; }
+.filmstrip-wrap {
+  overflow: hidden; width: 100%; opacity: 0; position: relative;
+  /* Liquid glass container */
+  isolation: isolate;
+}
+
+/* Center-bright, edge-dark vignette mask — фото в центре ярче, по краям темнее */
+.filmstrip-wrap::after {
+  content: '';
+  position: absolute; inset: 0; z-index: 10; pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    rgba(7,6,5,.92) 0%,
+    rgba(7,6,5,.55) 8%,
+    rgba(7,6,5,.18) 18%,
+    transparent 32%,
+    transparent 68%,
+    rgba(7,6,5,.18) 82%,
+    rgba(7,6,5,.55) 92%,
+    rgba(7,6,5,.92) 100%
+  );
+}
+
+/* Liquid glass shimmer line top */
+.filmstrip-wrap::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 1px; z-index: 11; pointer-events: none;
+  background: linear-gradient(90deg,
+    transparent 0%, rgba(201,169,110,.08) 20%,
+    rgba(255,255,255,.18) 50%,
+    rgba(201,169,110,.08) 80%, transparent 100%
+  );
+}
+
+/* Glass panel за filmstrip */
+.filmstrip-glass {
+  position: absolute; inset: 0; pointer-events: none; z-index: 9;
+  backdrop-filter: blur(0px) saturate(1.2);
+  -webkit-backdrop-filter: blur(0px) saturate(1.2);
+  background: linear-gradient(
+    180deg,
+    rgba(255,255,255,.012) 0%,
+    rgba(201,169,110,.018) 50%,
+    rgba(0,0,0,.08) 100%
+  );
+  border-top: 1px solid rgba(255,255,255,.06);
+  border-bottom: 1px solid rgba(255,255,255,.04);
+  /* Left/right glass edge glow */
+  box-shadow:
+    inset 4px 0 24px rgba(0,0,0,.35),
+    inset -4px 0 24px rgba(0,0,0,.35),
+    inset 0 1px 0 rgba(255,255,255,.07);
+}
+
 .filmstrip { display: flex; gap: 0; width: max-content; will-change: transform; }
+
 .film-item {
   flex: 0 0 auto;
   width: clamp(120px, 28vw, 215px);
@@ -425,6 +479,8 @@ html, body {
   border-left: 1px solid rgba(201,169,110,.06);
   border-right: 1px solid rgba(0,0,0,.6);
   cursor: pointer;
+  /* Liquid glass micro border on each item */
+  transition: filter .4s ease;
 }
 .film-item img, .film-item video {
   width: 100%; height: 100%; object-fit: cover;
@@ -436,12 +492,134 @@ html, body {
   background: linear-gradient(transparent 50%, rgba(0,0,0,.6));
   z-index: 1;
 }
+
+/* Liquid glass reflection inside each film-item */
+.film-item::after {
+  content: ''; position: absolute; inset: 0; z-index: 3; pointer-events: none;
+  background: linear-gradient(
+    135deg,
+    rgba(255,255,255,.07) 0%,
+    rgba(255,255,255,.02) 30%,
+    transparent 55%,
+    rgba(201,169,110,.03) 100%
+  );
+}
+
 .film-item .film-caption {
   position: absolute; bottom: 10px; left: 0; right: 0; text-align: center;
   font-family: 'Cinzel', serif; font-size: clamp(7px, 1.5vw, 8px);
   letter-spacing: 4px; text-transform: uppercase;
   color: var(--gold-light); z-index: 2; opacity: .75;
   text-shadow: 0 1px 6px rgba(0,0,0,.9);
+}
+
+/* ─── LIQUID GLASS — глобальный стиль ─── */
+
+/* Photo frames — жидкое стекло */
+.photo-frame {
+  border-radius: 2px;
+  box-shadow:
+    0 8px 32px rgba(0,0,0,.55),
+    0 2px 8px rgba(0,0,0,.4),
+    inset 0 1px 0 rgba(255,255,255,.09),
+    inset 0 -1px 0 rgba(0,0,0,.3),
+    0 0 0 1px rgba(201,169,110,.18);
+}
+.photo-frame::before {
+  border-radius: 2px;
+  background: linear-gradient(
+    135deg,
+    rgba(255,255,255,.07) 0%,
+    transparent 40%,
+    rgba(201,169,110,.04) 100%
+  ) !important;
+  border: 1px solid rgba(255,255,255,.08) !important;
+  backdrop-filter: blur(1px);
+  -webkit-backdrop-filter: blur(1px);
+}
+
+/* Timer blocks — жидкое стекло */
+.t-block {
+  border-radius: 3px;
+  background: rgba(255,255,255,.028) !important;
+  backdrop-filter: blur(12px) saturate(1.4);
+  -webkit-backdrop-filter: blur(12px) saturate(1.4);
+  border: 1px solid rgba(255,255,255,.09) !important;
+  box-shadow:
+    0 4px 24px rgba(0,0,0,.45),
+    inset 0 1px 0 rgba(255,255,255,.12),
+    inset 0 -1px 0 rgba(0,0,0,.25),
+    0 0 0 1px rgba(201,169,110,.08);
+}
+.t-block::before {
+  background: linear-gradient(
+    135deg,
+    rgba(255,255,255,.08) 0%,
+    rgba(201,169,110,.04) 50%,
+    transparent 100%
+  ) !important;
+  border-radius: 3px;
+}
+
+/* Gallery items — лёгкое стекло */
+.g-item {
+  border-radius: 2px;
+  box-shadow:
+    0 2px 12px rgba(0,0,0,.4),
+    inset 0 1px 0 rgba(255,255,255,.06),
+    0 0 0 1px rgba(201,169,110,.06);
+}
+
+/* Start button — жидкое стекло */
+.start-btn {
+  backdrop-filter: blur(16px) saturate(1.6);
+  -webkit-backdrop-filter: blur(16px) saturate(1.6);
+  background: rgba(255,255,255,.04) !important;
+  border: 1px solid rgba(255,255,255,.14) !important;
+  box-shadow:
+    0 8px 32px rgba(0,0,0,.4),
+    inset 0 1px 0 rgba(255,255,255,.15),
+    inset 0 -1px 0 rgba(0,0,0,.2),
+    0 0 0 1px rgba(201,169,110,.1);
+  border-radius: 1px;
+}
+
+/* Intro screen — liquid glass glow */
+#intro-screen {
+  background: rgba(7,6,5,.88) !important;
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+#intro-screen::after {
+  content: '';
+  position: absolute; inset: 0; pointer-events: none; z-index: 0; border-radius: inherit;
+  background: linear-gradient(
+    160deg,
+    rgba(255,255,255,.025) 0%,
+    transparent 40%,
+    rgba(201,169,110,.015) 100%
+  );
+  border: 1px solid rgba(255,255,255,.05);
+}
+
+/* Thank author button — уже имеет backdrop, усиливаем */
+.thank-author-btn {
+  box-shadow:
+    0 4px 20px rgba(0,0,0,.5),
+    inset 0 1px 0 rgba(255,255,255,.1),
+    inset 0 -1px 0 rgba(0,0,0,.2) !important;
+  border: 1px solid rgba(255,255,255,.1) !important;
+}
+
+/* Chapter label — glass pill */
+#chapter-lbl {
+  padding: 4px 14px;
+  background: rgba(7,6,5,.55);
+  backdrop-filter: blur(12px) saturate(1.5);
+  -webkit-backdrop-filter: blur(12px) saturate(1.5);
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 100px;
+  box-shadow: 0 2px 12px rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.08);
 }
 .filmstrip-wrap::before, .filmstrip-wrap::after {
   content: ''; position: absolute; left: 0; right: 0; height: 12px;
@@ -743,6 +921,66 @@ html, body {
   .g-item img, .g-item video,
   .film-item img, .film-item video { transition: none; transform: none !important; }
 }
+/* ─── THANK AUTHOR BUTTON ─── */
+/* ─── КНОПКА "ОТБЛАГОДАРИТЬ АВТОРА" — правый нижний угол ─── */
+.thank-author-wrap {
+  position: fixed;
+  bottom: max(14px, calc(var(--safe-bottom) + 10px));
+  right: max(14px, calc(var(--safe-right) + 10px));
+  z-index: 60;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(10px);
+  transition: opacity 1s ease, transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+  will-change: transform, opacity;
+}
+.thank-author-wrap.visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+.thank-author-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 13px;
+  background: rgba(7, 6, 5, 0.72);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(201, 169, 110, 0.18);
+  border-radius: 100px;
+  cursor: pointer;
+  font-family: 'Cinzel', serif;
+  font-size: 7px;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: rgba(201, 169, 110, 0.55);
+  white-space: nowrap;
+  transition: color 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease, transform 0.2s ease;
+  text-decoration: none;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+.thank-author-btn:hover,
+.thank-author-btn:focus-visible {
+  border-color: rgba(201, 169, 110, 0.38);
+  color: rgba(201, 169, 110, 0.85);
+  box-shadow: 0 0 16px rgba(201, 169, 110, 0.1);
+  transform: translateY(-1px);
+}
+.thank-author-btn:active {
+  transform: scale(0.97);
+  transition: transform 0.1s ease;
+}
+.thank-icon {
+  font-size: 9px;
+  display: inline-block;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.thank-author-btn:hover .thank-icon {
+  transform: scale(1.25) rotate(-8deg);
+}
 </style>
 </head>
 <body>
@@ -821,6 +1059,7 @@ html, body {
       <div class="t-headline" id="s4h"></div>
     </div>
     <div class="filmstrip-wrap" id="fs1-wrap">
+      <div class="filmstrip-glass"></div>
       <div class="filmstrip" id="fs1"></div>
     </div>
     <div class="ticker-label" id="tick4"></div>
@@ -868,6 +1107,7 @@ html, body {
       <div class="t-headline" id="s9h"></div>
     </div>
     <div class="filmstrip-wrap" id="fs2-wrap">
+      <div class="filmstrip-glass"></div>
       <div class="filmstrip" id="fs2"></div>
     </div>
   </div>
@@ -1417,6 +1657,33 @@ function animateFilmstrip(wrapId, stripId, dir=1){
     {x: dir>0 ? 0 : -totalW},
     {x: dir>0 ? -totalW : 0, duration:22, ease:'none', repeat:-1}
   );
+
+  // Center-brightness effect: items near center are brighter
+  const wrapRect = ()=> wrap.getBoundingClientRect();
+  let rafBrightness;
+  function updateBrightness(){
+    const wr = wrapRect();
+    const cx = wr.left + wr.width / 2;
+    const halfW = wr.width * 0.5;
+    const items = strip.querySelectorAll('.film-item');
+    items.forEach(item=>{
+      const r = item.getBoundingClientRect();
+      const itemCx = r.left + r.width / 2;
+      const dist = Math.abs(itemCx - cx);
+      // 0 at center → full brightness; halfW at edge → dim
+      const t = Math.min(dist / halfW, 1);
+      // brightness from 1.08 (center) down to 0.38 (far edge)
+      const brightness = 1.08 - t * 0.70;
+      // scale slightly: center items slightly bigger
+      const sc = 1 + (1 - t) * 0.04;
+      item.style.filter = `brightness(${brightness.toFixed(2)}) saturate(${(0.8 + (1-t)*0.5).toFixed(2)})`;
+      item.style.transform = `scale(${sc.toFixed(3)})`;
+      item.style.transformOrigin = 'center center';
+      item.style.zIndex = Math.round((1-t)*10);
+    });
+    rafBrightness = requestAnimationFrame(updateBrightness);
+  }
+  rafBrightness = requestAnimationFrame(updateBrightness);
 }
 
 // ═══ MASTER TIMELINE ═════════════════════════════════════════
@@ -1546,6 +1813,14 @@ function buildAndPlay(){
     text:{value:C.settings.finalPoem},
     ease:'none'
   },'-=32');
+  
+  // Показываем кнопку благодарности после завершения стихотворения
+  masterTl.add(() => {
+    const thankWrap = document.getElementById('thank-author-wrap');
+    if (thankWrap) {
+      thankWrap.classList.add('visible');
+    }
+  }, '+=2');
 
   // progress bar
   masterTl.eventCallback('onUpdate',()=>{
@@ -1626,5 +1901,14 @@ window.beginStory = function(){
 
 } // end initApp
 </script>
+
+<!-- Thank Author Button — правый нижний угол, только на финале -->
+<div class="thank-author-wrap" id="thank-author-wrap">
+  <a href="https://send.monobank.ua/jar/6S34HzcLMS" class="thank-author-btn" id="thank-author-btn" target="_blank" rel="noopener noreferrer">
+    <span class="thank-icon">✨</span>
+    <span>Отблагодарить автора</span>
+  </a>
+</div>
+
 </body>
 </html>
