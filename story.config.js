@@ -99,7 +99,7 @@ window.STORY_CONFIG = {
     body:     "Каждое утро рядом с тобой — это подарок.",
     media: {
       type: "photo",
-      src:  "media/photo10.jpg",
+      src:  "media/photo7.jpg",
       caption: "Наш дом",
     }
   },
@@ -108,14 +108,14 @@ window.STORY_CONFIG = {
   //  СЦЕНА 6 — ВИДЕО-МОМЕНТ (полноэкранное видео)
   // ──────────────────────────────────────────────
   scene6: {
-    chapter:   "Живой момент",
-    eyebrow:   "Живой момент",
+    chapter:   "",
+    eyebrow:   "",
     headline:  "Некоторые воспоминания нельзя уместить в кадр.",
     media: {
       type: "video",
-      src:  "media/photo11.jpg",   // ← замени на своё видео
+      src:  "media/video8.mp4",   // ← замени на своё видео
       caption: "Этот день мы никогда не забудем",
-      // poster: "media/video1-poster.jpg",   // превью до воспроизведения (опционально)
+      // poster: "media/photo2.jpg",   // превью до воспроизведения (опционально)
     }
   },
 
@@ -127,9 +127,9 @@ window.STORY_CONFIG = {
     eyebrow:  "Праздники и приключения",
     headline: "Вместе — это лучший план.",
     items: [
-      { type:"photo", src:"media/photo12.jpg", caption:"Путешествие" },
-      { type:"video", src:"media/video2.mp4",               caption:"Наш праздник" },
-      { type:"photo", src:"media/photo13.jpg", caption:"Наш вечер" },
+      { type:"photo", src:"media/photo18.jpg", caption:"Наши прогулки " },
+      { type:"video", src:"media/video6.mp4",               caption:"Наш праздник" },
+      { type:"video", src:"media/video7.mp4", caption:"Наш вечер" },
     ]
   },
 
@@ -147,13 +147,13 @@ window.STORY_CONFIG = {
   // ──────────────────────────────────────────────
   scene9: {
     chapter:  "Год вместе",
-    eyebrow:  "Последний год",
-    headline: "Год, ставший вечностью.",
+    eyebrow:  "",
+    headline: ".",
     items: [
-      { type:"photo", src:"media/photo14.jpg", caption:"Зима" },
-      { type:"video", src:"media/video3.mp4",               caption:"Весна" },
-      { type:"photo", src:"media/photo15.jpg", caption:"Лето" },
-      { type:"photo", src:"media/photo16.jpg", caption:"Осень" },
+      { type:"photo", src:"media/photo6.jpg", caption:"Зима" },
+      { type:"photo", src:"media/photo5.jpg",               caption:"Весна" },
+      { type:"photo", src:"media/photo14.jpg", caption:"Лето" },
+      { type:"photo", src:"media/photo17.jpg", caption:"Осень" },
     ]
   },
 
