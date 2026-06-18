@@ -68,7 +68,7 @@ window.STORY_CONFIG = {
       { type:"photo", src:"media/photo12.jpg", caption:"День когда мы стали еще ближе" },
       { type:"photo", src:"media/photo13.jpg", caption:"День который стал особеным" },
       { type:"photo", src:"media/photo11.jpg", caption:"Момент который мы будем помнить всегда" },
-      { type:"video", src:"media/video3.mp4",              caption:"Волшебный день созданый для тебя " },
+      { type:"video", src:"https://github.com/Travkaa52/video1/blob/main/video3.mp4",              caption:"Волшебный день созданый для тебя " },
     ]
   },
 
