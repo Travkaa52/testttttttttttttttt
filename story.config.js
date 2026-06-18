@@ -68,7 +68,7 @@ window.STORY_CONFIG = {
       { type:"photo", src:"media/photo12.jpg", caption:"День когда мы стали еще ближе" },
       { type:"photo", src:"media/photo13.jpg", caption:"День который стал особеным" },
       { type:"photo", src:"media/photo11.jpg", caption:"Момент который мы будем помнить всегда" },
-      { type:"video", src:"https://raw.githubusercontent.com/Travkaa52/video1/main/video3.mp4", caption:"Волшебный день созданый для тебя " },
+      { type:"video", src:"/video3.mp4",              caption:"Волшебный день созданый для тебя " },
     ]
   },
 
@@ -82,9 +82,9 @@ window.STORY_CONFIG = {
     items: [
       { type:"photo", src:"media/photo5.jpg",  caption:"Первый весна вместе" },
       { type:"photo", src:"media/photo2.jpg",  caption:"День когда мы стали семьей" },
-      { type:"video", src:"https://raw.githubusercontent.com/Travkaa52/video1/main/video1.mp4",               caption:"Наш первый новый год" },
-      { type:"video", src:"https://raw.githubusercontent.com/Travkaa52/video1/main/video2.mp4",  caption:"Наш первый танец" },
-      { type:"video", src:"https://raw.githubusercontent.com/Travkaa52/video1/main/video5.mp4",  caption:"Первый закат" },
+      { type:"video", src:"media/video1.mp4",               caption:"Наш первый новый год" },
+      { type:"video", src:"/video2.mp4",  caption:"Наш первый танец" },
+      { type:"video", src:"/video5.mp4",  caption:"Первый закат" },
       { type:"photo", src:"media/photo9.jpg", caption:"Вместе" },
     ]
   },
@@ -113,7 +113,7 @@ window.STORY_CONFIG = {
     headline:  "Некоторые воспоминания нельзя уместить в кадр.",
     media: {
       type: "video",
-      src:  "https://raw.githubusercontent.com/Travkaa52/video1/main/video8.mp4",
+      src:  "/video8.mp4",   // ← замени на своё видео
       caption: "Этот день мы никогда не забудем",
       // poster: "media/photo2.jpg",   // превью до воспроизведения (опционально)
     }
@@ -128,8 +128,8 @@ window.STORY_CONFIG = {
     headline: "Вместе — это лучший план.",
     items: [
       { type:"photo", src:"media/photo18.jpg", caption:"Наши прогулки " },
-      { type:"video", src:"https://raw.githubusercontent.com/Travkaa52/video1/main/video6.mp4",               caption:"Наш праздник" },
-      { type:"video", src:"https://raw.githubusercontent.com/Travkaa52/video1/main/video7.mp4", caption:"Наш вечер" },
+      { type:"video", src:"/video6.mp4",               caption:"Наш праздник" },
+      { type:"video", src:"/video7.mp4", caption:"Наш вечер" },
     ]
   },
 
