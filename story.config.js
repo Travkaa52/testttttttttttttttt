@@ -1,6 +1,6 @@
 /**
  * ╔══════════════════════════════════════════════════════════════╗
- * ║              КОНФИГУРАЦИЯ НАШЕЙ ИСТОРИИ                      ║
+ * ║          КОНФИГУРАЦИЯ НАШЕЙ ИСТОРИИ                          ║
  * ║  Редактируй этот файл — и история обновится автоматически    ║
  * ╚══════════════════════════════════════════════════════════════╝
  *
@@ -20,7 +20,7 @@ window.STORY_CONFIG = {
   //  ОБЩИЕ НАСТРОЙКИ
   // ──────────────────────────────────────────────
   settings: {
-    coupleNames:   "Лиза & Женя ",           // Имена пары (на интро)
+    coupleNames:   "Лиза & Женя",             // Имена пары (на интро)
     anniversary:   "1 год вместе",             // Подзаголовок интро
     startDate:     "2025-06-24T20:00:00",      // Дата начала отношений (для таймера)
     finalPoem: `Спасибо за каждый день рядом.
@@ -51,9 +51,9 @@ window.STORY_CONFIG = {
     headline: "Я до сих пор помню каждую секунду.",
     body:     "Ты вошла — и время остановилось.",
     media: {
-      type: "photo",                            // "photo" или "video"
+      type: "photo",                             // "photo" или "video"
       src:  "media/photo4.jpg",
-      caption: "Первый день рождения с тобой,который навсегда останется в сердце",               // Подпись под медиа
+      caption: "Первый день рождения с тобой, который навсегда останется в сердце", // Подпись под медиа
     }
   },
 
@@ -65,10 +65,10 @@ window.STORY_CONFIG = {
     eyebrow:  "Первые воспоминания",
     headline: "Моменты, которые я храню.",
     items: [
-      { type:"photo", src:"media/photo12.jpg", caption:"День когда мы стали еще ближе" },
-      { type:"photo", src:"media/photo13.jpg", caption:"День который стал особеным" },
-      { type:"photo", src:"media/photo11.jpg", caption:"Момент который мы будем помнить всегда" },
-      { type:"video", src:"/video3.mp4",              caption:"Волшебный день созданый для тебя " },
+      { type: "photo", src: "media/photo12.jpg", caption: "День, когда мы стали еще ближе" },
+      { type: "photo", src: "media/photo13.jpg", caption: "День, который стал особенным" },
+      { type: "photo", src: "media/photo11.jpg", caption: "Момент, который мы будем помнить всегда" },
+      { type: "video", src: "video3.mp4",        caption: "Волшебный день, созданный для тебя" }, // лежит в корне
     ]
   },
 
@@ -80,12 +80,12 @@ window.STORY_CONFIG = {
     eyebrow:  "Наша лента",
     headline: "Кадры, из которых соткана наша жизнь.",
     items: [
-      { type:"photo", src:"media/photo5.jpg",  caption:"Первый весна вместе" },
-      { type:"photo", src:"media/photo2.jpg",  caption:"День когда мы стали семьей" },
-      { type:"video", src:"media/video1.mp4",               caption:"Наш первый новый год" },
-      { type:"video", src:"/video2.mp4",  caption:"Наш первый танец" },
-      { type:"video", src:"/video5.mp4",  caption:"Первый закат" },
-      { type:"photo", src:"media/photo9.jpg", caption:"Вместе" },
+      { type: "photo", src: "media/photo5.jpg",  caption: "Первая весна вместе" },
+      { type: "photo", src: "media/photo2.jpg",  caption: "День, когда мы стали семьей" },
+      { type: "video", src: "media/video1.mp4",  caption: "Наш первый Новый год" },
+      { type: "video", src: "video2.mp4",        caption: "Наш первый танец" }, // лежит в корне
+      { type: "video", src: "video5.mp4",        caption: "Первый закат" },      // лежит в корне
+      { type: "photo", src: "media/photo9.jpg",  caption: "Вместе" },
     ]
   },
 
@@ -108,14 +108,14 @@ window.STORY_CONFIG = {
   //  СЦЕНА 6 — ВИДЕО-МОМЕНТ (полноэкранное видео)
   // ──────────────────────────────────────────────
   scene6: {
-    chapter:   "",
-    eyebrow:   "",
-    headline:  "Некоторые воспоминания нельзя уместить в кадр.",
+    chapter:  "",
+    eyebrow:  "",
+    headline: "Некоторые воспоминания нельзя уместить в кадр.",
     media: {
       type: "video",
-      src:  "/video8.mp4",   // ← замени на своё видео
+      src:  "video8.mp4",                        // лежит в корне
       caption: "Этот день мы никогда не забудем",
-      // poster: "media/photo2.jpg",   // превью до воспроизведения (опционально)
+      // poster: "media/photo2.jpg",           // превью до воспроизведения (опционально)
     }
   },
 
@@ -127,9 +127,9 @@ window.STORY_CONFIG = {
     eyebrow:  "Праздники и приключения",
     headline: "Вместе — это лучший план.",
     items: [
-      { type:"photo", src:"media/photo18.jpg", caption:"Наши прогулки " },
-      { type:"video", src:"/video6.mp4",               caption:"Наш праздник" },
-      { type:"video", src:"/video7.mp4", caption:"Наш вечер" },
+      { type: "photo", src: "media/photo18.jpg", caption: "Наши прогулки" },
+      { type: "video", src: "video6.mp4",        caption: "Наш праздник" }, // лежит в корне
+      { type: "video", src: "video7.mp4",        caption: "Наш вечер" },    // лежит в корне
     ]
   },
 
@@ -148,12 +148,12 @@ window.STORY_CONFIG = {
   scene9: {
     chapter:  "Год вместе",
     eyebrow:  "",
-    headline: ".",
+    headline: "",
     items: [
-      { type:"photo", src:"media/photo6.jpg", caption:"Зима" },
-      { type:"photo", src:"media/photo5.jpg",               caption:"Весна" },
-      { type:"photo", src:"media/photo14.jpg", caption:"Лето" },
-      { type:"photo", src:"media/photo17.jpg", caption:"Осень" },
+      { type: "photo", src: "media/photo6.jpg",  caption: "Зима" },
+      { type: "photo", src: "media/photo5.jpg",  caption: "Весна" },
+      { type: "photo", src: "media/photo14.jpg", caption: "Лето" },
+      { type: "photo", src: "media/photo17.jpg", caption: "Осень" },
     ]
   },
 
