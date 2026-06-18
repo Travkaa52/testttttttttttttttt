@@ -1166,6 +1166,7 @@ function makeMedia(item, autoplay=false, muted=true){
     v.loop = true;
     v.setAttribute('playsinline','');
     v.setAttribute('webkit-playsinline','');
+    v.setAttribute('crossorigin','anonymous');
     if(autoplay){ v.autoplay = true; v.setAttribute('autoplay',''); }
     return v;
   } else {
@@ -1996,10 +1997,10 @@ if ('serviceWorker' in navigator) {
 <script>
 (function(){
   /* ── CONFIG ── */
-  var VIDEO_TIMEOUT_MS  = 30000; // 30 сек на каждое видео
-  var AUDIO_TIMEOUT_MS  = 15000;
+  var VIDEO_TIMEOUT_MS  = 90000; // 90 сек на каждое видео (внешние URL с GitHub)
+  var AUDIO_TIMEOUT_MS  = 20000;
   var IMAGE_TIMEOUT_MS  = 12000;
-  var MAX_CONCURRENT    = 4;     // параллельных загрузок
+  var MAX_CONCURRENT    = 2;     // меньше параллельных — GitHub raw не любит flood
 
   /* ── STATE ── */
   var allUrls   = [];  // [{url, type, label, status}]
@@ -2076,6 +2077,7 @@ if ('serviceWorker' in navigator) {
         v.muted    = true;
         v.playsInline = true;
         v.setAttribute('playsinline','');
+        v.setAttribute('crossorigin','anonymous');
         /* canplaythrough = браузер уверен, что может играть без буферизации */
         v.addEventListener('canplaythrough', function(){ fin(true); }, {once:true});
         v.addEventListener('error',          function(){ fin(false); }, {once:true});
